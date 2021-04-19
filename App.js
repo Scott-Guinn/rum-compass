@@ -5,15 +5,17 @@ import { Constants } from 'expo';
 import * as Permissions from 'expo-permissions';
 import * as Location from 'expo-location';
 
-
 import axios from 'axios';
 
 export default function App() {
   const [latitude, setLatitude] = useState(null);
   const [longitude, setLongitude] = useState(null);
+  const [heading, setHeading] = useState(null);
+
   const [location, setLocation] = useState(null);
   const [permissionGranted, setPermissionGranted] = useState(false);
 
+  /*
   const findCurrentLocation = () => {
     navigator.geolocation.getCurrentPosition(
       position => {
@@ -25,6 +27,7 @@ export default function App() {
       }, { enableHighAccuracy: true, timeout: 20000, maximumAge: 1000 }
     );
   }
+  */
 
   const findCurrentLocationAsync = async () => {
 
@@ -35,6 +38,10 @@ export default function App() {
     }
 
     let location = await Location.getCurrentPositionAsync({})
+
+    setLatitude(location.coords.latitude);
+    setLongitude(location.coords.longitude);
+    setHeading(location.coords.heading);
     setLocation(JSON.stringify(location));
   }
 
@@ -44,7 +51,9 @@ export default function App() {
         <Text>Where Am I?</Text>
         {permissionGranted ? (
           <View>
-            <Text>{location}</Text>
+            <Text>latitude: {latitude}</Text>
+            <Text>longitude: {longitude}</Text>
+            <Text>heading: {heading}</Text>
           </View>) : (
           <Text> Location denied </Text>
         )}
