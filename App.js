@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, SafeAreaView, TouchableOpacity, Image, TextInput } from 'react-native';
+import { StyleSheet, Text, View, SafeAreaView, TouchableOpacity, TouchableWithoutFeedback, Image, TextInput, Animated, Easing } from 'react-native';
 import { Constants } from 'expo';
 import * as Permissions from 'expo-permissions';
 import * as Location from 'expo-location';
@@ -9,8 +9,8 @@ import axios from 'axios';
 export default function App() {
   const [latitude, setLatitude] = useState(null);
   const [longitude, setLongitude] = useState(null);
-  const [heading, setHeading] = useState(null);
-  const [bearing, setBearing] = useState(null);
+  const [heading, setHeading] = useState(0);
+  const [bearing, setBearing] = useState(0);
 
   const [location, setLocation] = useState(null);
   const [permissionGranted, setPermissionGranted] = useState(false);
@@ -59,8 +59,25 @@ export default function App() {
       })
   }
 
+  // Animation:
+  var rotateValue = new Animated.Value(0); // declare animated value
+  var b2d = bearing - heading;
+  var rotation = rotateValue.interpolate({
+    inputRange: [0, .5, .75, 1],
+    outputRange: ["0deg", b2d + 30 + 'deg', b2d - 20 + 'deg', b2d + 'deg'] // degree of rotation
+  });
+
+  var transformStyle = {
+    transform: [{ rotate: rotation }],
+    position: "absolute",
+    resizeMode: "contain",
+    height: "40%",
+    zIndex: 2,
+    top: "52%"
+  };
+
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} >
       <TouchableOpacity style={{
         backgroundColor: "darkorange",
         flex: 1,
@@ -80,10 +97,13 @@ export default function App() {
           <Text> No location </Text>
         )}
       </TouchableOpacity>
+
       {/* FOR TESTING ONLY:  Sets heading to 45 degrees */}
-      <TouchableOpacity onPress={() => setHeading(45)}>
-        <Text> Set heading to 45 deg</Text>
-      </TouchableOpacity>
+      <TouchableOpacity onPress={() => setHeading(270)
+      }>
+        <Text> Set heading to 270 deg</Text>
+      </TouchableOpacity >
+
       <View style={{
         backgroundColor: "green",
         flex: 4,
@@ -93,20 +113,25 @@ export default function App() {
       }}>
         <Image
           source={require('./assets/new_compass.png')}
-          style={{ height: "100%", width: "100%", backgroundColor: "grey", resizeMode: "contain" }} />
-        <Image
-          source={require('./assets/circle_compass.png')}
-          style={{
-            position: "absolute",
-            resizeMode: "contain",
-            height: "40%",
-            zIndex: 2,
-            top: "52%",
-            transform: [{ rotate: `${bearing - heading}deg` }]
+          style={styles.compassHousing} />
+
+        <TouchableWithoutFeedback
+          onPressIn={() => {
+            Animated.timing(rotateValue, {
+              toValue: 1,
+              duration: 2000,
+              easing: Easing.linear,
+              useNativeDriver: true
+            }).start();
           }}
-        />
+        >
+          <Animated.Image
+            source={require('./assets/circle_compass.png')}
+            style={transformStyle}
+          />
+        </TouchableWithoutFeedback>
       </View>
-    </SafeAreaView>
+    </SafeAreaView >
   );
 }
 
@@ -118,4 +143,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  compassHousing: {
+    height: "100%",
+    width: "100%",
+    backgroundColor: "grey",
+    resizeMode: "contain",
+  },
+
 });
