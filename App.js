@@ -45,6 +45,19 @@ export default function App() {
     setLocation(JSON.stringify(location));
   }
 
+  const requestNearest = () => {
+    console.log('requestNearest has been called');
+    const position = {lat: latitude, lng: longitude};
+    axios.post(`http://localhost:8000/`, { position: position, wantMost: "bar" })
+    .then(({ data }) => {
+      console.log('Bearing to destination: ', data.bearing);
+      // setBearing(data.bearing);
+      // console.log('Data from server: ', data);
+    }).catch((err) => {
+      console.log('error in GET request to server: ', err);
+    })
+  }
+
   return (
     <View style={styles.container}>
       <TouchableOpacity onPress={findCurrentLocationAsync}>
@@ -59,6 +72,9 @@ export default function App() {
         )}
 
         <StatusBar style="auto" />
+      </TouchableOpacity>
+      <TouchableOpacity>
+        <Text onPress={requestNearest}> requestNearest </Text>
       </TouchableOpacity>
     </View>
   );
