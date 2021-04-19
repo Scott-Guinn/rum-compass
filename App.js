@@ -1,6 +1,5 @@
-import { StatusBar } from 'expo-status-bar';
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, Image } from 'react-native';
 import { Constants } from 'expo';
 import * as Permissions from 'expo-permissions';
 import * as Location from 'expo-location';
@@ -62,26 +61,53 @@ export default function App() {
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity onPress={findCurrentLocationAsync}>
-        <Text>Where Am I?</Text>
+      <TouchableOpacity style={{
+        backgroundColor: "darkorange",
+        flex: 1,
+        justifyContent: "center",
+        width: "100%",
+        alignItems: 'center'
+      }}
+        onPress={findCurrentLocationAsync}>
+        <Text style={{fontWeight: 'bold'}}>Where Am I?</Text>
         {permissionGranted ? (
-          <View>
+           <View>
             <Text>latitude: {latitude}</Text>
             <Text>longitude: {longitude}</Text>
             <Text>heading: {heading}</Text>
             <Text>bearing: {bearing}</Text>
           </View>) : (
-          <Text> Location denied </Text>
+          <Text> No location </Text>
         )}
-
-        <StatusBar style="auto" />
       </TouchableOpacity>
+      <View style={{
+        backgroundColor: "green",
+        flex: 4,
+        justifyContent: "center",
+        width: "100%",
+        alignItems: 'center'
+      }}>
+        <Image
+          source={require('./assets/new_compass.png')}
+          style={{height: "100%", width: "100%", backgroundColor: "grey", resizeMode: "contain"}} />
+        <Image
+          source={require('./assets/circle_compass.png')}
+          style={{position: "absolute",
+          resizeMode: "contain",
+          height: "40%",
+          zIndex: 2,
+          top: "52%",
+          transform: [{ rotate: `${bearing - heading}deg` }]
+        }}
+        />
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
+    flexDirection: "column",
     flex: 1,
     backgroundColor: '#fff',
     alignItems: 'center',
