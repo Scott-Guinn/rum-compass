@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, SafeAreaView, TouchableOpacity, TouchableWithoutFeedback, Image, TextInput, Animated, Easing } from 'react-native';
 import { Constants } from 'expo';
-import * as Permissions from 'expo-permissions';
 import * as Location from 'expo-location';
 
 import axios from 'axios';
@@ -15,23 +14,8 @@ export default function App() {
   const [location, setLocation] = useState(null);
   const [permissionGranted, setPermissionGranted] = useState(false);
 
-  /*
-  const findCurrentLocation = () => {
-    navigator.geolocation.getCurrentPosition(
-      position => {
-        const lat = JSON.stringify(position.coords.latitude);
-        const long = JSON.stringify(position.coords.longitude);
-
-        setLatitude(lat);
-        setLongitude(long);
-      }, { enableHighAccuracy: true, timeout: 20000, maximumAge: 1000 }
-    );
-  }
-  */
-
   const findCurrentLocationAsync = async () => {
-
-    let { status } = await Permissions.askAsync(Permissions.LOCATION);
+    let { status } = await Location.requestForegroundPermissionsAsync();
 
     if (status === 'granted') {
       setPermissionGranted(true);
@@ -60,11 +44,11 @@ export default function App() {
   }
 
   // Animation:
-  var rotateValue = new Animated.Value(0); // declare animated value
+  var rotateValue = new Animated.Value(0);
   var b2d = bearing - heading;
   var rotation = rotateValue.interpolate({
     inputRange: [0, .5, .75, 1],
-    outputRange: ["0deg", b2d + 30 + 'deg', b2d - 20 + 'deg', b2d + 'deg'] // degree of rotation
+    outputRange: ["0deg", b2d + 30 + 'deg', b2d - 20 + 'deg', b2d + 'deg'] // crude compass wobble simulation
   });
 
   var transformStyle = {
