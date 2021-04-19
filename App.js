@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, Image } from 'react-native';
+import { StyleSheet, Text, View, SafeAreaView, TouchableOpacity, Image, TextInput } from 'react-native';
 import { Constants } from 'expo';
 import * as Permissions from 'expo-permissions';
 import * as Location from 'expo-location';
@@ -49,18 +49,18 @@ export default function App() {
   const requestNearest = (lat, long) => {
     console.log('requestNearest has been called: ', lat, long);
 
-    const position = {lat: lat, lng: long};
+    const position = { lat: lat, lng: long };
     axios.post(`http://localhost:8000/`, { position: position, wantMost: "bar" })
-    .then(({ data }) => {
-      console.log('Bearing to destination: ', data.bearing);
-      setBearing(data.bearing);
-    }).catch((err) => {
-      console.log('error in GET request to server: ', err);
-    })
+      .then(({ data }) => {
+        console.log('Bearing to destination: ', data.bearing);
+        setBearing(data.bearing);
+      }).catch((err) => {
+        console.log('error in GET request to server: ', err);
+      })
   }
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <TouchableOpacity style={{
         backgroundColor: "darkorange",
         flex: 1,
@@ -69,9 +69,9 @@ export default function App() {
         alignItems: 'center'
       }}
         onPress={findCurrentLocationAsync}>
-        <Text style={{fontWeight: 'bold'}}>Where Am I?</Text>
+        <Text style={{ fontWeight: 'bold' }}>Where Am I?</Text>
         {permissionGranted ? (
-           <View>
+          <View>
             <Text>latitude: {latitude}</Text>
             <Text>longitude: {longitude}</Text>
             <Text>heading: {heading}</Text>
@@ -79,6 +79,10 @@ export default function App() {
           </View>) : (
           <Text> No location </Text>
         )}
+      </TouchableOpacity>
+      {/* FOR TESTING ONLY:  Sets heading to 45 degrees */}
+      <TouchableOpacity onPress={() => setHeading(45)}>
+        <Text> Set heading to 45 deg</Text>
       </TouchableOpacity>
       <View style={{
         backgroundColor: "green",
@@ -89,19 +93,20 @@ export default function App() {
       }}>
         <Image
           source={require('./assets/new_compass.png')}
-          style={{height: "100%", width: "100%", backgroundColor: "grey", resizeMode: "contain"}} />
+          style={{ height: "100%", width: "100%", backgroundColor: "grey", resizeMode: "contain" }} />
         <Image
           source={require('./assets/circle_compass.png')}
-          style={{position: "absolute",
-          resizeMode: "contain",
-          height: "40%",
-          zIndex: 2,
-          top: "52%",
-          transform: [{ rotate: `${bearing - heading}deg` }]
-        }}
+          style={{
+            position: "absolute",
+            resizeMode: "contain",
+            height: "40%",
+            zIndex: 2,
+            top: "52%",
+            transform: [{ rotate: `${bearing - heading}deg` }]
+          }}
         />
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 
