@@ -11,6 +11,7 @@ export default function App() {
   const [latitude, setLatitude] = useState(null);
   const [longitude, setLongitude] = useState(null);
   const [heading, setHeading] = useState(null);
+  const [bearing, setBearing] = useState(null);
 
   const [location, setLocation] = useState(null);
   const [permissionGranted, setPermissionGranted] = useState(false);
@@ -38,6 +39,7 @@ export default function App() {
     }
 
     let location = await Location.getCurrentPositionAsync({})
+    let bearing = await requestNearest(location.coords.latitude, location.coords.longitude);
 
     setLatitude(location.coords.latitude);
     setLongitude(location.coords.longitude);
@@ -45,14 +47,14 @@ export default function App() {
     setLocation(JSON.stringify(location));
   }
 
-  const requestNearest = () => {
-    console.log('requestNearest has been called');
-    const position = {lat: latitude, lng: longitude};
+  const requestNearest = (lat, long) => {
+    console.log('requestNearest has been called: ', lat, long);
+
+    const position = {lat: lat, lng: long};
     axios.post(`http://localhost:8000/`, { position: position, wantMost: "bar" })
     .then(({ data }) => {
       console.log('Bearing to destination: ', data.bearing);
-      // setBearing(data.bearing);
-      // console.log('Data from server: ', data);
+      setBearing(data.bearing);
     }).catch((err) => {
       console.log('error in GET request to server: ', err);
     })
@@ -67,14 +69,12 @@ export default function App() {
             <Text>latitude: {latitude}</Text>
             <Text>longitude: {longitude}</Text>
             <Text>heading: {heading}</Text>
+            <Text>bearing: {bearing}</Text>
           </View>) : (
           <Text> Location denied </Text>
         )}
 
         <StatusBar style="auto" />
-      </TouchableOpacity>
-      <TouchableOpacity>
-        <Text onPress={requestNearest}> requestNearest </Text>
       </TouchableOpacity>
     </View>
   );
