@@ -8,6 +8,7 @@
     "eject": "expo eject"
   },
   "dependencies": {
+    "@expo/ngrok": "^2.4.3",
     "axios": "^0.21.1",
     "expo": "~41.0.0",
     "expo-location": "~12.0.4",

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, SafeAreaView, TouchableOpacity, TouchableWithoutFeedback, Image, TextInput, Animated, Easing } from 'react-native';
 import { Constants } from 'expo';
 import * as Location from 'expo-location';
+const url = 'https://salty-beyond-02367.herokuapp.com/';
 
 import axios from 'axios';
 
@@ -10,18 +11,23 @@ export default function App() {
   const [longitude, setLongitude] = useState(null);
   const [heading, setHeading] = useState(0);
   const [bearing, setBearing] = useState(0);
+  const [distance, setDistance] = useState(null);
+  const [nameOfDestination, setNameOfDestination] = useState(null);
 
   const [location, setLocation] = useState(null);
   const [permissionGranted, setPermissionGranted] = useState(false);
 
+  // retrieves heading information from device
+
   const findCurrentLocationAsync = async () => {
+    console.log('findCurrentLocationAsync has been called');
     let { status } = await Location.requestForegroundPermissionsAsync();
 
     if (status === 'granted') {
       setPermissionGranted(true);
     }
 
-    let location = await Location.getCurrentPositionAsync({})
+    let location = await Location.getCurrentPositionAsync({});
     let bearing = await requestNearest(location.coords.latitude, location.coords.longitude);
 
     setLatitude(location.coords.latitude);
@@ -31,13 +37,18 @@ export default function App() {
   }
 
   const requestNearest = (lat, long) => {
-    console.log('requestNearest has been called: ', lat, long);
+    console.log('requestNearest has been called:', lat, long);
 
     const position = { lat: lat, lng: long };
-    axios.post(`http://localhost:8000/`, { position: position, wantMost: "bar" })
+    axios.post(url, { position: position, wantMost: "bar" })
       .then(({ data }) => {
+        console.log('data from requestNearest: ', data);
         console.log('Bearing to destination: ', data.bearing);
+        console.log('Distance to destination: ', data.distance);
+        console.log('Name of destination: ', data.name);
         setBearing(data.bearing);
+        setDistance(Math.trunc(data.distance));
+        setNameOfDestination(data.name);
       }).catch((err) => {
         console.log('error in GET request to server: ', err);
       })
@@ -73,10 +84,12 @@ export default function App() {
         <Text style={{ fontWeight: 'bold' }}>Where Am I?</Text>
         {permissionGranted ? (
           <View>
-            <Text>latitude: {latitude}</Text>
-            <Text>longitude: {longitude}</Text>
-            <Text>heading: {heading}</Text>
-            <Text>bearing: {bearing}</Text>
+            <Text>current latitude: {latitude}</Text>
+            <Text>current longitude: {longitude}</Text>
+            <Text>current heading: {heading}</Text>
+            <Text>bearing to dest: {bearing}</Text>
+            <Text>distance: {distance} meters</Text>
+            <Text>name of destination: {nameOfDestination}</Text>
           </View>) : (
           <Text> No location </Text>
         )}
