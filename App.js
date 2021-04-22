@@ -5,17 +5,12 @@ import {
   View,
   SafeAreaView,
   TouchableOpacity,
-  TouchableWithoutFeedback,
   Image,
-  TextInput,
-  Animated,
-  Easing
 } from 'react-native';
-import { Constants } from 'expo';
-import * as Location from 'expo-location';
-const serverUrl = 'https://salty-beyond-02367.herokuapp.com/';
-
 import axios from 'axios';
+import * as Location from 'expo-location';
+
+const serverUrl = 'https://salty-beyond-02367.herokuapp.com/';
 
 export default function App() {
   const [latitude, setLatitude] = useState(null);
@@ -24,39 +19,40 @@ export default function App() {
   const [bearing, setBearing] = useState(0);
   const [distance, setDistance] = useState(null);
   const [nameOfDestination, setNameOfDestination] = useState(null);
-  let counter = 0;
 
   const [location, setLocation] = useState(null);
   const [permissionGranted, setPermissionGranted] = useState(false);
 
-  // Retrieves heading information from device
-  const findCurrentLocationAsync = async () => {
-    console.log('findCurrentLocationAsync has been called');
-
+  // This function retrieves heading and location information from the device when prompted by user press
+  const handlePress = async () => {
     // Request foreground location permissions
     let { status } = await Location.requestForegroundPermissionsAsync();
     if (status === 'granted') {
       setPermissionGranted(true);
     }
-
-    // Get current lat/long
-    Location.watchPositionAsync({ timeInterval: 1000, distanceInterval: 10 }, (position) => {
-      console.log('position: ', position);
-      setLatitude(position.coords.latitude);
-      setLongitude(position.coords.longitude);
-      setLocation(position.coords);
-    })
-
+    // Subscribe to current position of device
+    fetchLocation();
+    // Subscribe to current heading of device
     fetchHeading();
   }
 
-  const fetchHeading = async () => {
+  const fetchLocation = () => {
+    // timeInterval is minimum time between updates (milliseconds)
+    // distanceInterval is minimum distance between updates (meters)
+    Location.watchPositionAsync({ timeInterval: 1000, distanceInterval: 10 }, (position) => {
+      setLatitude(position.coords.latitude);
+      setLongitude(position.coords.longitude);
+      setLocation(position.coords);
+    });
+  }
+
+  const fetchHeading = () => {
     Location.watchHeadingAsync((hdg) => {
       setHeading(hdg.trueHeading);
     });
   }
 
-  // pings the server requesting the nearest bar given input arguments lat and long.
+  // Pings the server requesting the nearest "bar" given input lat and long
   const requestNearest = (lat, long) => {
     if (lat && long) {
       console.log('request to server made');
@@ -85,7 +81,7 @@ export default function App() {
         width: "100%",
         alignItems: 'center'
       }}
-        onPress={findCurrentLocationAsync}>
+        onPress={handlePress}>
         <Text style={{ fontWeight: 'bold' }}>Where Am I?</Text>
         {permissionGranted ? (
           <View>
@@ -173,6 +169,4 @@ const styles = StyleSheet.create({
           }}
         >
         </TouchableWithoutFeedback>
-
-
 */
