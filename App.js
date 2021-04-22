@@ -109,7 +109,7 @@ export default function App() {
 
         <Image
           source={require('./assets/circle_compass.png')}
-          style={[styles.compassDial, {transform: [{ rotate: `${bearing - heading} + 'deg`}]}]}
+          style={[styles.compassDial, {transform: [{ rotate: `${bearing - heading}deg`}]}]}
         />
       </View>
     </SafeAreaView >
