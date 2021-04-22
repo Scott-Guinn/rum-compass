@@ -9,7 +9,8 @@ import {
   Image,
   TextInput,
   Animated,
-  Easing } from 'react-native';
+  Easing
+} from 'react-native';
 import { Constants } from 'expo';
 import * as Location from 'expo-location';
 const serverUrl = 'https://salty-beyond-02367.herokuapp.com/';
@@ -39,7 +40,7 @@ export default function App() {
     }
 
     // Get current lat/long
-    Location.watchPositionAsync({timeInterval: 1000}, (position) => {
+    Location.watchPositionAsync({ timeInterval: 1000, distanceInterval: 10 }, (position) => {
       console.log('position: ', position);
       setLatitude(position.coords.latitude);
       setLongitude(position.coords.longitude);
@@ -51,8 +52,6 @@ export default function App() {
 
   const fetchHeading = async () => {
     Location.watchHeadingAsync((hdg) => {
-      // setHeading(hdg);
-      console.log('hdg: ', hdg);
       setHeading(hdg.trueHeading);
     });
   }
@@ -63,36 +62,19 @@ export default function App() {
       console.log('request to server made');
       const position = { lat: lat, lng: long };
       axios.post(serverUrl, { position: position, wantMost: "bar" })
-      .then(({ data }) => {
-        setBearing(data.bearing);
-        setDistance(Math.trunc(data.distance));
-        setNameOfDestination(data.name);
-      }).catch((err) => {
-        console.log('error in GET request to server: ', err);
-      })
+        .then(({ data }) => {
+          setBearing(data.bearing);
+          setDistance(Math.trunc(data.distance));
+          setNameOfDestination(data.name);
+        }).catch((err) => {
+          console.log('error in GET request to server: ', err);
+        })
     }
   }
 
- useEffect(()=> {
-   console.log('useEffect called (location has changed)');
-   requestNearest(latitude, longitude);
- }, [location]);
-
-  // Animation:
-  var rotateValue = new Animated.Value(0);
-  var relativeBearing = bearing - heading;
-  var rotation = rotateValue.interpolate({
-    inputRange: [0, .5, .75, 1],
-    outputRange: ["0deg", relativeBearing + 30 + 'deg', relativeBearing - 20 + 'deg', relativeBearing + 'deg'] // crude compass wobble simulation
-  });
-  var transformStyle = {
-    transform: [{ rotate: rotation }],
-    position: "absolute",
-    resizeMode: "contain",
-    height: "40%",
-    zIndex: 2,
-    top: "52%"
-  };
+  useEffect(() => {
+    requestNearest(latitude, longitude);
+  }, [location]);
 
   return (
     <SafeAreaView style={styles.container} >
@@ -114,15 +96,9 @@ export default function App() {
             <Text>distance: {distance} meters</Text>
             <Text>name of destination: {nameOfDestination}</Text>
           </View>) : (
-          <Text> No location </Text>
+          <Text>Tap to begin</Text>
         )}
       </TouchableOpacity>
-
-      {/* FOR TESTING ONLY:  Sets heading to 45 degrees */}
-      <TouchableOpacity onPress={() => setHeading(270)
-      }>
-        <Text> Set heading to 270 deg</Text>
-      </TouchableOpacity >
 
       <View style={{
         backgroundColor: "green",
@@ -135,21 +111,10 @@ export default function App() {
           source={require('./assets/new_compass.png')}
           style={styles.compassHousing} />
 
-        <TouchableWithoutFeedback
-          onPressIn={() => {
-            Animated.timing(rotateValue, {
-              toValue: 1,
-              duration: 2000,
-              easing: Easing.linear,
-              useNativeDriver: true
-            }).start();
-          }}
-        >
-          <Animated.Image
-            source={require('./assets/circle_compass.png')}
-            style={transformStyle}
-          />
-        </TouchableWithoutFeedback>
+        <Image
+          source={require('./assets/circle_compass.png')}
+          style={[styles.compassDial, {transform: [{ rotate: `${bearing - heading} + 'deg`}]}]}
+        />
       </View>
     </SafeAreaView >
   );
@@ -169,5 +134,45 @@ const styles = StyleSheet.create({
     backgroundColor: "grey",
     resizeMode: "contain",
   },
-
+  compassDial: {
+    position: "absolute",
+    resizeMode: "contain",
+    height: "40%",
+    zIndex: 2,
+    top: "52%",
+  },
 });
+
+/*
+  Deprecated compass animation code:
+
+  var rotateValue = new Animated.Value(0);
+  var relativeBearing = bearing - heading;
+  var rotation = rotateValue.interpolate({
+    inputRange: [0, .5, .75, 1],
+    outputRange: ["0deg", relativeBearing + 30 + 'deg', relativeBearing - 20 + 'deg', relativeBearing + 'deg'] // crude compass wobble simulation
+  });
+
+  var transformStyle = {
+    transform: [{ rotate: rotation }],
+    position: "absolute",
+    resizeMode: "contain",
+    height: "40%",
+    zIndex: 2,
+    top: "52%"
+  };
+
+        <TouchableWithoutFeedback
+          onPressIn={() => {
+            Animated.timing(rotateValue, {
+              toValue: 1,
+              duration: 2000,
+              easing: Easing.linear,
+              useNativeDriver: true
+            }).start();
+          }}
+        >
+        </TouchableWithoutFeedback>
+
+
+*/
