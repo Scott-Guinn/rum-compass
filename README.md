@@ -17,5 +17,7 @@ Ultimately this compass will point the user towards the nearest bar where he can
 - update current heading on a regular basis (every 5 seconds or so)
 - create a modal for when user arrives at destination (or within 500 feet)
 
+- refactor calculateDistance & calculateBearing to the frontend or a separate route so API request is not made for simple recalculations
+
 Backlog:
 - fix the crude 'wobble' simulation of the compass

@@ -1,8 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, SafeAreaView, TouchableOpacity, TouchableWithoutFeedback, Image, TextInput, Animated, Easing } from 'react-native';
+import {
+  StyleSheet,
+  Text,
+  View,
+  SafeAreaView,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  Image,
+  TextInput,
+  Animated,
+  Easing } from 'react-native';
 import { Constants } from 'expo';
 import * as Location from 'expo-location';
-const url = 'https://salty-beyond-02367.herokuapp.com/';
+const serverUrl = 'https://salty-beyond-02367.herokuapp.com/';
 
 import axios from 'axios';
 
@@ -13,55 +23,68 @@ export default function App() {
   const [bearing, setBearing] = useState(0);
   const [distance, setDistance] = useState(null);
   const [nameOfDestination, setNameOfDestination] = useState(null);
+  let counter = 0;
 
   const [location, setLocation] = useState(null);
   const [permissionGranted, setPermissionGranted] = useState(false);
 
-  // retrieves heading information from device
-
+  // Retrieves heading information from device
   const findCurrentLocationAsync = async () => {
     console.log('findCurrentLocationAsync has been called');
-    let { status } = await Location.requestForegroundPermissionsAsync();
 
+    // Request foreground location permissions
+    let { status } = await Location.requestForegroundPermissionsAsync();
     if (status === 'granted') {
       setPermissionGranted(true);
     }
 
-    let location = await Location.getCurrentPositionAsync({});
-    let bearing = await requestNearest(location.coords.latitude, location.coords.longitude);
+    // Get current lat/long
+    Location.watchPositionAsync({timeInterval: 1000}, (position) => {
+      console.log('position: ', position);
+      setLatitude(position.coords.latitude);
+      setLongitude(position.coords.longitude);
+      setLocation(position.coords);
+    })
 
-    setLatitude(location.coords.latitude);
-    setLongitude(location.coords.longitude);
-    setHeading(location.coords.heading);
-    setLocation(JSON.stringify(location));
+    fetchHeading();
   }
 
-  const requestNearest = (lat, long) => {
-    console.log('requestNearest has been called:', lat, long);
+  const fetchHeading = async () => {
+    Location.watchHeadingAsync((hdg) => {
+      // setHeading(hdg);
+      console.log('hdg: ', hdg);
+      setHeading(hdg.trueHeading);
+    });
+  }
 
-    const position = { lat: lat, lng: long };
-    axios.post(url, { position: position, wantMost: "bar" })
+  // pings the server requesting the nearest bar given input arguments lat and long.
+  const requestNearest = (lat, long) => {
+    if (lat && long) {
+      console.log('request to server made');
+      const position = { lat: lat, lng: long };
+      axios.post(serverUrl, { position: position, wantMost: "bar" })
       .then(({ data }) => {
-        console.log('data from requestNearest: ', data);
-        console.log('Bearing to destination: ', data.bearing);
-        console.log('Distance to destination: ', data.distance);
-        console.log('Name of destination: ', data.name);
         setBearing(data.bearing);
         setDistance(Math.trunc(data.distance));
         setNameOfDestination(data.name);
       }).catch((err) => {
         console.log('error in GET request to server: ', err);
       })
+    }
   }
+
+ useEffect(()=> {
+   console.log('useEffect called (location has changed)');
+   requestNearest(latitude, longitude);
+ }, [location]);
 
   // Animation:
   var rotateValue = new Animated.Value(0);
-  var b2d = bearing - heading;
+  var relativeBearing = bearing - heading;
   var rotation = rotateValue.interpolate({
     inputRange: [0, .5, .75, 1],
-    outputRange: ["0deg", b2d + 30 + 'deg', b2d - 20 + 'deg', b2d + 'deg'] // crude compass wobble simulation
+    outputRange: ["0deg", relativeBearing + 30 + 'deg', relativeBearing - 20 + 'deg', relativeBearing + 'deg'] // crude compass wobble simulation
   });
-
   var transformStyle = {
     transform: [{ rotate: rotation }],
     position: "absolute",
