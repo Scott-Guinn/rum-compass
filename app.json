@@ -4,7 +4,7 @@
     "slug": "rum-compass",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/square_compass.png",
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
@@ -27,6 +27,7 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "description": "A compass that doesn't point North. But we're not trying to find North now are we?"
   }
 }
