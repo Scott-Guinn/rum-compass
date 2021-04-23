@@ -1,5 +1,6 @@
 {
   "expo": {
+    "owner": "rum-pirates",
     "name": "rum-compass",
     "slug": "rum-compass",
     "version": "1.0.0",
