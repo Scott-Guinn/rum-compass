@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   TouchableHighlight,
   Image,
+  Platform, StatusBar
 } from 'react-native';
 import axios from 'axios';
 import AppLoading from 'expo-app-loading';
@@ -95,34 +96,41 @@ export default function App() {
   } else {
     return (
       <SafeAreaView style={styles.container} >
-        {/* displays ArrivedModal if modalVisible is true */}
+        {/* displays ArrivedModal if within 50 meters */}
         {modalVisible ? <ArrivedModal modalVisible={modalVisible} setModalVisible={setModalVisible} destination={nameOfDestination} /> : null}
 
-        {showDetails && (
-
-        <TouchableOpacity
-          onPress={() => setShowDetails(!showDetails)}
-          style={styles.detailsView}>
-
-          <Text style={{ fontWeight: 'bold' }}>Where Am I?</Text>
-          {permissionGranted ? (
-            <View>
-              <Text>current latitude: {latitude}</Text>
-              <Text>current longitude: {longitude}</Text>
-              <Text>current heading: {heading}</Text>
-              <Text>bearing to dest: {bearing}</Text>
-              <Text>distance: {distance} meters</Text>
-              <Text>name of destination: {nameOfDestination}</Text>
-            </View>) : (
-            <Text>Location permissions not granted.</Text>
-          )}
-
-        </TouchableOpacity>
+        {/* displays a 'showDetails' bar */}
+        {!showDetails && (
+          <TouchableOpacity
+            style={styles.expandDetails}
+            onPress={() => setShowDetails(!showDetails)}>
+            <Text>Click to display details</Text>
+          </TouchableOpacity>
         )}
 
-        <TouchableOpacity onPress={() => setShowDetails(!showDetails)}>
-          <Text>Click to display details</Text>
-        </TouchableOpacity>
+        {/* if showDetails has been clicked, displays the details */}
+        {showDetails && (
+          <TouchableOpacity
+            onPress={() => setShowDetails(!showDetails)}
+            style={styles.detailsView}>
+
+            <Text style={{ fontWeight: 'bold' }}>Where Am I?</Text>
+            {permissionGranted ? (
+              <View>
+                <Text>My latitude: {latitude.toFixed(4)}</Text>
+                <Text>My longitude: {longitude.toFixed(4)}</Text>
+                <Text>My heading: {heading.toFixed(1)}</Text>
+                <Text>Bearing to destination: {bearing.toFixed(2)}</Text>
+                <Text>Distance: {distance || 'unknown'} meters</Text>
+                <Text>Name of Destination: {nameOfDestination}</Text>
+              </View>) : (
+              <Text>Location permissions not granted.</Text>
+            )}
+
+          </TouchableOpacity>
+        )}
+
+        {/* ------ Compass images -----*/}
 
         <View style={{
           backgroundColor: "green",
@@ -139,6 +147,7 @@ export default function App() {
             style={[styles.compassDial, { transform: [{ rotate: `${bearing - heading}deg` }] }]}
           />
         </View>
+
       </SafeAreaView >
     );
   }
@@ -151,6 +160,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     alignItems: 'center',
     justifyContent: 'center',
+    paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
   },
   compassHousing: {
     height: "100%",
@@ -168,6 +178,12 @@ const styles = StyleSheet.create({
   detailsView: {
     backgroundColor: "darkorange",
     flex: 1,
+    justifyContent: "center",
+    width: "100%",
+    alignItems: 'center'
+  },
+  expandDetails: {
+    backgroundColor: "#fff",
     justifyContent: "center",
     width: "100%",
     alignItems: 'center'
