@@ -67,7 +67,7 @@ export default function App() {
     if (lat && long) {
       console.log('request to server made');
       const position = { lat: lat, lng: long };
-      axios.post(serverUrl, { position: position, wantMost: "casey middle school" })
+      axios.post(serverUrl, { position: position, wantMost: "bar" })
         .then(({ data }) => {
           setBearing(data.bearing);
           setDistance(Math.trunc(data.distance));
