@@ -5,7 +5,6 @@ import {
   View,
   SafeAreaView,
   TouchableOpacity,
-  TouchableHighlight,
   Image,
   Platform, StatusBar
 } from 'react-native';
