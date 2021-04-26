@@ -2,7 +2,7 @@
 
 But we're not trying to find North, are we!
 
-![Alt text](/screen-shot_details.png "Screenshot" =100x500)
+![Alt text](/screen-shot_details.png "Screenshot")
 
 ## 🧪🧪🧪 Currently in BETA TESTING 🧪🧪🧪
 This will point the user towards the nearest bar where he can refill his drink.
