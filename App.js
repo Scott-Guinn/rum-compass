@@ -68,9 +68,11 @@ export default function App() {
       const position = { lat: lat, lng: long };
       axios.post(serverUrl, { position: position, wantMost: "bar" })
         .then(({ data }) => {
-          setBearing(data.bearing);
-          setDistance(Math.trunc(data.distance));
-          setNameOfDestination(data.name);
+          if (data) {
+            setBearing(data.bearing);
+            setDistance(Math.trunc(data.distance));
+            setNameOfDestination(data.name);
+          }
         }).catch((err) => {
           console.log('error in GET request to server: ', err);
         })
