@@ -28,6 +28,7 @@ export default function App() {
   const [location, setLocation] = useState(null);
   const [permissionGranted, setPermissionGranted] = useState(false);
 
+  const [arrived, setArrived] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
 
   const [showDetails, setShowDetails] = useState(false);
@@ -55,6 +56,7 @@ export default function App() {
     });
   }
 
+  // subscribes to the heading information on the device
   const fetchHeading = () => {
     Location.watchHeadingAsync((hdg) => {
       setHeading(hdg.magHeading);
@@ -64,7 +66,7 @@ export default function App() {
   // Pings the server requesting the nearest "bar" given input lat and long
   const requestNearest = (lat, long) => {
     if (lat && long) {
-      console.log('request to server made');
+      // console.log('request to server made');
       const position = { lat: lat, lng: long };
       axios.post(serverUrl, { position: position, wantMost: "bar" })
         .then(({ data }) => {
@@ -72,17 +74,22 @@ export default function App() {
             setBearing(data.bearing);
             setDistance(Math.trunc(data.distance));
             setNameOfDestination(data.name);
+          } else {
+            throw new Error('data returned falsy from server');
           }
         }).catch((err) => {
-          console.log('error in GET request to server: ', err);
+          console.error('error in GET request to server: ', err);
         })
     }
   }
 
   useEffect(() => {
     requestNearest(latitude, longitude);
-    if (distance !== null && distance <= 50) {
+    if (distance !== null && distance <= 50 && !arrived) {
       setModalVisible(true);
+      setArrived(true);
+    } else if (distance > 50) {
+      setArrived(false);
     }
   }, [location]);
 
@@ -190,35 +197,3 @@ const styles = StyleSheet.create({
     alignItems: 'center'
   },
 });
-
-/*
-  Deprecated compass animation code:
-
-  var rotateValue = new Animated.Value(0);
-  var relativeBearing = bearing - heading;
-  var rotation = rotateValue.interpolate({
-    inputRange: [0, .5, .75, 1],
-    outputRange: ["0deg", relativeBearing + 30 + 'deg', relativeBearing - 20 + 'deg', relativeBearing + 'deg'] // crude compass wobble simulation
-  });
-
-  var transformStyle = {
-    transform: [{ rotate: rotation }],
-    position: "absolute",
-    resizeMode: "contain",
-    height: "40%",
-    zIndex: 2,
-    top: "52%"
-  };
-
-        <TouchableWithoutFeedback
-          onPressIn={() => {
-            Animated.timing(rotateValue, {
-              toValue: 1,
-              duration: 2000,
-              easing: Easing.linear,
-              useNativeDriver: true
-            }).start();
-          }}
-        >
-        </TouchableWithoutFeedback>
-*/
